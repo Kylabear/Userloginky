@@ -1,31 +1,37 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 $servername = "localhost";
 $username = "root";
 $password = "";
 $dbname = "user_system";
 
-// Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
 
-// Check connection
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-$username = $_POST['username'];
-$password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-$year = $_POST['year'];
-$course = $_POST['course'];
-$program = $_POST['program'];
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $username = $_POST['username'];
+    $password = password_hash($_POST['password'], PASSWORD_BCRYPT); 
+    $year = $_POST['year'];
+    $course = $_POST['course'];
+    $program = $_POST['program'];
 
-$sql = "INSERT INTO users (username, password, year, course, program) VALUES ('$username', '$password', '$year', '$course', '$program')";
+    $stmt = $conn->prepare("INSERT INTO users (username, password, year, course, program) VALUES (?, ?, ?, ?, ?)");
+    $stmt->bind_param("sssss", $username, $password, $year, $course, $program);
 
-if ($conn->query($sql) === TRUE) {
-    echo "Registration successful";
-    header("Location: login.php");
-    exit();
-} else {
-    echo "Error: " . $sql . "<br>" . $conn->error;
+    if ($stmt->execute()) {
+        echo "Registration successful";
+        header("Location: login.php");
+        exit();
+    } else {
+        echo "Error: " . $stmt->error;
+    }
+
+    $stmt->close();
 }
 
 $conn->close();

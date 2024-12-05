@@ -1,36 +1,45 @@
 <?php
 session_start();
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
 $servername = "localhost";
 $username = "root";
 $password = "";
 $dbname = "user_system";
 
-// Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
 
-// Check connection
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-$username = $_POST['username'];
-$password = $_POST['password'];
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $username = $_POST['username'];
+    $password = $_POST['password'];
 
-$sql = "SELECT * FROM users WHERE username='$username'";
-$result = $conn->query($sql);
+    
+    $stmt = $conn->prepare("SELECT password FROM users WHERE username = ?");
+    $stmt->bind_param("s", $username); 
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-if ($result->num_rows > 0) {
-    $row = $result->fetch_assoc();
-    if (password_verify($password, $row['password'])) {
-        $_SESSION['username'] = $username;
-        header("Location: view_users.php");
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+
+     
+        if (password_verify($password, $row['password'])) {
+            $_SESSION['username'] = $username;
+            header("Location: view_users.php");
+            exit();
+        } else {
+            echo "Invalid password";
+        }
     } else {
-        echo "Invalid password";
+        echo "No user found with this username";
     }
-} else {
-    echo "No user found with this username";
-}
 
+    $stmt->close();
+}
 $conn->close();
 ?>
