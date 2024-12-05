@@ -3,7 +3,7 @@ session_start();
 
 $servername = "localhost";
 $username = "root";
-$password = "mypasswordkylacode12A.";
+$password = "";
 $dbname = "user_system";
 
 // Create connection

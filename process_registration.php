@@ -1,7 +1,7 @@
 <?php
 $servername = "localhost";
 $username = "root";
-$password = "mypasswordkylacode12A.";
+$password = "";
 $dbname = "user_system";
 
 // Create connection
@@ -22,6 +22,8 @@ $sql = "INSERT INTO users (username, password, year, course, program) VALUES ('$
 
 if ($conn->query($sql) === TRUE) {
     echo "Registration successful";
+    header("Location: login.php");
+    exit();
 } else {
     echo "Error: " . $sql . "<br>" . $conn->error;
 }
